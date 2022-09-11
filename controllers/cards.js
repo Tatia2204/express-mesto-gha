@@ -32,34 +32,45 @@ module.exports.getCards = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.deleteOne({ _id: req.params.cardId })
+    .orFail(() => new Error(`Карточка с таким _id ${req.params.cardId} не найден`))
     .then((card) => res.send(card))
-    .catch(() => res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
+      } else if (err.name === 'ValidationError') {
+        res.status(DEFAULT_ERROR).send({ message: 'Сервер не может обработать ваш запрос' });
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' });
+      }
+    });
 };
 
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .orFail(() => new Error(`Карточка с таким _id ${req.params.cardId} не найден`))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' });
-      } else {
+      } else if (err.name === 'ValidationError') {
         res.status(DEFAULT_ERROR).send({ message: 'Сервер не может обработать ваш запрос' });
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' });
       }
     });
 };
 
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .orFail(() => new Error(`Карточка с таким _id ${req.params.cardId} не найден`))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' });
-      } else {
+      } else if (err.name === 'ValidationError') {
         res.status(DEFAULT_ERROR).send({ message: 'Сервер не может обработать ваш запрос' });
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' });
       }
     });
 };

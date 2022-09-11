@@ -18,13 +18,13 @@ module.exports.getAllUser = (req, res) => {
 
 module.exports.getUserById = (req, res) => {
   Users.findById(req.params.userId)
-    .orFail(() => new Error (`Пользователь с таким _id ${ req.params.userId } не найден`))
+    .orFail(() => new Error(`Пользователь с таким _id ${req.params.userId} не найден`))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Пользователь не найден' });
+        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
       } else {
-        res.status(DEFAULT_ERROR).send({ message: 'Сервер не может обработать ваш запрос' });
+        res.status(NOT_FOUND_ERROR).send({ message: 'Пользователь не найден' });
       }
     });
 };
@@ -44,17 +44,20 @@ module.exports.createUser = (req, res) => {
 
 module.exports.getUserByIdUpdate = (req, res) => {
   const { name, about } = req.body;
-  Users.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не найдена' });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: 'Сервер не может обработать ваш запрос' });
-      }
-    });
+  if (name && about && name.length >= 2 && name.length <= 30) {
+    Users.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+      .orFail(() => new Error(`Пользователь с таким _id ${req.params.userId} не найден`))
+      .then((user) => res.send(user))
+      .catch((err) => {
+        if (err.name === 'CastError') {
+          res.status(NOT_FOUND_ERROR).send({ message: 'Пользователь не найден' });
+        } else {
+          res.status(DEFAULT_ERROR).send({ message: 'Сервер не может обработать ваш запрос' });
+        }
+      });
+  } else {
+    res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
+  }
 };
 
 module.exports.getAvatarByIdUpdate = (req, res) => {
