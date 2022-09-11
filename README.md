@@ -29,4 +29,4 @@
 
 **GitHub Pages**
 
-* [Ссылка на GitHub Pages](https://tatia2204.github.io/express-mesto-gha/)
+* [Ссылка на GitHub Pages](https://github.com/Tatia2204/express-mesto-gha.git)
