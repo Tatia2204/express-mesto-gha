@@ -18,6 +18,7 @@ module.exports.getAllUser = (req, res) => {
 
 module.exports.getUserById = (req, res) => {
   Users.findById(req.params.userId)
+    .orFail(() => new Error (`Пользователь с таким _id ${ req.params.userId } не найден`))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
