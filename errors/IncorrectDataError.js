@@ -4,4 +4,4 @@ class IncorrectDataError extends Error {
     this.statusCode = 400;
   }
 }
-module.exports = IncorrectDataError;
+module.exports = { IncorrectDataError };

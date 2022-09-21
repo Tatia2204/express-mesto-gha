@@ -9,12 +9,14 @@ const {
   validationCreateUser, validationLogin,
 } = require('./middlewares/validations');
 const auth = require('./middlewares/auth');
-const NotFound = require('./errors/NotFoundError');
+const { NotFoundError } = require('./errors/NotFoundError');
 const DefaultError = require('./errors/DefaultError');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,16 +25,13 @@ app.post('/signin', validationLogin, login);
 app.post('/signup', validationCreateUser, createUser);
 
 app.use(auth);
-app.use(errors());
-app.use(DefaultError);
-
-mongoose.connect('mongodb://localhost:27017/mestodb');
-
 app.use('/users', routerUsers);
 app.use('/cards', routerCards);
 
+app.use(errors());
+app.use(DefaultError);
 app.use('/', (req, res, next) => {
-  next(new NotFound('Страница не найдена'));
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.listen(PORT, () => {
