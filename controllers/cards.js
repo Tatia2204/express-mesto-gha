@@ -1,83 +1,80 @@
 const Card = require('../models/card');
+const NotFound = require('../errors/NotFoundError');
+const IncorrectData = require('../errors/IncorrectDataError');
+const AccessError = require('../errors/AccessError');
 
-const ERROR_CODE = 400;
-const NOT_FOUND_ERROR = 404;
-const DEFAULT_ERROR = 500;
-
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+        throw new IncorrectData('Некорректные данные');
       }
-    });
+    })
+    .catch(next);
 };
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.deleteOne({ _id: req.params.cardId })
     .orFail(() => {
       const error = new Error(`Карточка с таким _id ${req.params.cardId} не найдена`);
-      error.statusCode = NOT_FOUND_ERROR;
+      error.statusCode = NotFound;
       throw error;
     })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else if (err.statusCode === NOT_FOUND_ERROR) {
-        res.status(NOT_FOUND_ERROR).send({ message: err.message });
+        throw new IncorrectData('Некорректные данные');
+      } else if (err.statusCode === NotFound) {
+        throw new NotFound({ message: err.message });
       } else {
-        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+        throw new AccessError('В доступе отказано');
       }
-    });
+    })
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card
     .findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .orFail(() => {
       const error = new Error(`Карточка с таким _id ${req.params.cardId} не найдена`);
-      error.statusCode = NOT_FOUND_ERROR;
+      error.statusCode = NotFound;
       throw error;
     })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else if (err.statusCode === NOT_FOUND_ERROR) {
-        res.status(NOT_FOUND_ERROR).send({ message: err.message });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+        throw new IncorrectData('Некорректные данные');
+      } else if (err.statusCode === NotFound) {
+        throw new NotFound({ message: err.message });
       }
-    });
+    })
+    .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .orFail(() => {
       const error = new Error(`Карточка с таким _id ${req.params.cardId} не найдена`);
-      error.statusCode = NOT_FOUND_ERROR;
+      error.statusCode = NotFound;
       throw error;
     })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректные данные' });
-      } else if (err.statusCode === NOT_FOUND_ERROR) {
-        res.status(NOT_FOUND_ERROR).send({ message: err.message });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: 'На сервере произошла ошибка' });
+        throw new IncorrectData('Некорректные данные');
+      } else if (err.statusCode === NotFound) {
+        throw new NotFound({ message: err.message });
       }
-    });
+    })
+    .catch(next);
 };
