@@ -28,8 +28,12 @@ module.exports.getUserById = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar, email, } = req.body;
-  bcrypt.hash(req.body.password, 10)
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  if (!email || !password) throw new IncorrectDataError('Email или пароль не могут быть пустыми');
+
+  bcrypt.hash(password, 10)
     .then((hash) => {
       Users.create({
         name, about, avatar, email, password: hash
@@ -99,7 +103,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return Users.findUserByCredentials(email, password)
-    .then(() => {
+    .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
         'tts',
