@@ -8,12 +8,12 @@ const { ConflictError } = require('../errors/ConflictError');
 
 module.exports.getAllUser = (req, res, next) => {
   Users.find({})
-    .then((user) => res.send({ data: user }))
+    .then((users) => res.send({ data: users }))
     .catch(next);
 };
 
 module.exports.getUserById = (req, res, next) => {
-  Users.findById(req.params.id)
+  Users.findById(req.params.userId)
     .orFail(() => {
       throw new NotFoundError('Пользователь по указанному _id не найден');
     })

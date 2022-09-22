@@ -8,7 +8,7 @@ const {
 
 router.get('/', getAllUser);
 router.get('/me', getCurrentUser);
-router.get('/:id', validationUserById, getUserById);
+router.get('/:userId', validationUserById, getUserById);
 router.patch('/me', validationUserUpdate, getUserByIdUpdate);
 router.patch('/me/avatar', validationAvatarUpdate, getAvatarByIdUpdate);
 
