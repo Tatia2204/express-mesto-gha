@@ -36,7 +36,7 @@ module.exports.createUser = (req, res, next) => {
   bcrypt.hash(password, 10)
     .then((hash) => {
       Users.create({
-        name, about, avatar, email, password: hash
+        name, about, avatar, email, password: hash,
       })
         .then(() => res.status(200).send({
           data: {
@@ -45,15 +45,17 @@ module.exports.createUser = (req, res, next) => {
         }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            return next(new IncorrectDataError('Некорректные данные'));
-          } else if (err.code === 11000) {
-            return next(new ConflictError('Пользователь с таким email уже существует'));
+            next(new IncorrectDataError('Некорректные данные'));
+            return;
+          } if (err.code === 11000) {
+            next(new ConflictError('Пользователь с таким email уже существует'));
+            return;
           }
           next(err);
         });
     })
     .catch(next);
-}
+};
 
 module.exports.getUserByIdUpdate = (req, res, next) => {
   const { name, about } = req.body;
@@ -66,7 +68,8 @@ module.exports.getUserByIdUpdate = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError' || 'ValidationError') {
-        return next(new IncorrectDataError('Некорректные данные'));
+        next(new IncorrectDataError('Некорректные данные'));
+        return;
       }
       next(err);
     });
@@ -74,14 +77,19 @@ module.exports.getUserByIdUpdate = (req, res, next) => {
 
 module.exports.getAvatarByIdUpdate = (req, res, next) => {
   const { avatar } = req.body;
-  Users.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+  Users.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError' || 'ValidationError') {
-        return next(new IncorrectDataError('Некорректные данные'));
+        next(new IncorrectDataError('Некорректные данные'));
+        return;
       }
       next(err);
-    })
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
@@ -107,7 +115,7 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         'tts',
-        { expiresIn: '7d' }
+        { expiresIn: '7d' },
       );
       res.send({ token });
     })

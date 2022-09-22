@@ -10,7 +10,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new IncorrectDataError('Некорректные данные'));
+        next(new IncorrectDataError('Некорректные данные'));
       }
       next(err);
     });
@@ -44,7 +44,7 @@ module.exports.likeCard = (req, res, next) => {
     .findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     )
     .orFail(() => {
       throw new NotFoundError(`Карточка с таким _id ${req.params.cardId} не найдена`);
@@ -52,17 +52,18 @@ module.exports.likeCard = (req, res, next) => {
     .then((like) => res.send({ data: like }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new IncorrectDataError('Некорректные данные'));
+        next(new IncorrectDataError('Некорректные данные'));
+        return;
       }
       next(err);
-    })
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .orFail(() => {
       throw new NotFoundError(`Карточка с таким _id ${req.params.cardId} не найдена`);
@@ -70,8 +71,9 @@ module.exports.dislikeCard = (req, res, next) => {
     .then((like) => res.send({ data: like }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new IncorrectDataError('Некорректные данные'));
+        next(new IncorrectDataError('Некорректные данные'));
+        return;
       }
       next(err);
-    })
+    });
 };

@@ -1,9 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
-const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
 const {
   validationCreateUser, validationLogin,
