@@ -28,11 +28,12 @@ app.use(auth);
 app.use('/users', routerUsers);
 app.use('/cards', routerCards);
 
-app.use(errors());
-app.use(DefaultError);
 app.use('/', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
+
+app.use(errors());
+app.use(DefaultError);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
