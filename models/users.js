@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const isUrl = require('validator/lib/isURL');
 const isEmail = require('validator/lib/isEmail');
-const AuthError = require('../errors/AuthError');
+const { AuthError } = require('../errors/AuthError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -37,7 +37,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
     select: false,
   },
 });

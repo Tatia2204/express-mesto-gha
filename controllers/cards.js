@@ -11,8 +11,9 @@ module.exports.createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new IncorrectDataError('Некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -53,9 +54,9 @@ module.exports.likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new IncorrectDataError('Некорректные данные'));
-        return;
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -72,8 +73,8 @@ module.exports.dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new IncorrectDataError('Некорректные данные'));
-        return;
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
